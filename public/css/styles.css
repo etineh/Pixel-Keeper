@@ -1,0 +1,23 @@
+
+body {
+  background-image: url("https://media.istockphoto.com/vectors/abstract-technology-security-on-global-network-background-vector-vector-id1042838732?k=20&m=1042838732&s=612x612&w=0&h=rFbpZF8lw-xwxbJ2q1mkbzd--5dndM_L_383Ii6EHlI=");
+  margin-top: 60px;
+}
+
+.colo{
+  color: whitesmoke;
+  background-color: rgb(65, 8, 65);
+  padding-bottom: 30px;
+}
+
+.centered {
+    padding-top: 20px;
+    text-align: center;
+}
+
+.secret-text {
+  text-align: center;
+  font-size: 2rem;
+  color: #fff;
+  background-color: #000;
+}

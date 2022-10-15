@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+
+<div class="cover text-center">
+  <div class="container">
+    <h1 class="display-3 colo"><b>Keep Your Stuffs Safe here!</b><br></h1>
+    <h4 style="color: white; background-color: red;">Hint - tick the checkbox to delete</h4>
+    
+    <form action="/delete" method="post">
+      <%display.forEach((el)=>{%>
+        <p class="secret-text"> 
+          <input type="checkbox" name="del" onClick="this.form.submit()" value="<%= el._id %>">  
+          <%= el.secret %>
+        </p>
+      <%})%>
+    </form>
+
+    <a class="btn btn-light btn-lg" href="/logout" role="button">Log Out</a>
+    <a class="btn btn-dark btn-lg" href="/submit" role="button">Write And Submit Here</a>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
