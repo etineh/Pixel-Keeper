@@ -61,8 +61,8 @@ passport.deserializeUser(function(id, done) {
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://damp-gorge-70047.herokuapp.com/auth/google/keeper", 
-    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" 
+    callbackURL: process.env.CALL_URL, 
+    userProfileURL: process.env.USER_URL
   },
   function(accessToken, refreshToken, profile, cb) {
     UserModel.findOrCreate({ googleId: profile.id }, function (err, user) {
