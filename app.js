@@ -58,18 +58,18 @@ passport.deserializeUser(function(id, done) {
 });
 
   //google login setup //
-passport.use(new GoogleStrategy({
-    clientID: process.env.CLIENT_ID,
-    clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "http://localhost:4000/auth/google/keeper", 
-    userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" 
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    UserModel.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return cb(err, user);
-    });
-  }
-));
+// passport.use(new GoogleStrategy({
+//     clientID: process.env.CLIENT_ID,
+//     clientSecret: process.env.CLIENT_SECRET,
+//     callbackURL: "http://localhost:4000/auth/google/keeper", 
+//     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo" 
+//   },
+//   function(accessToken, refreshToken, profile, cb) {
+//     UserModel.findOrCreate({ googleId: profile.id }, function (err, user) {
+//       return cb(err, user);
+//     });
+//   }
+// ));
 
 //facebook login setup
 // passport.use(new FacebookStrategy({
@@ -96,15 +96,15 @@ app.get("/", (req, res)=>{
 });
 
 ///////////////Google login
-app.get("/auth/google",
-    passport.authenticate('google', {scope: ['profile']})
-)
+// app.get("/auth/google",
+//     passport.authenticate('google', {scope: ['profile']})
+// )
 
-app.get("/auth/google/keeper", 
-  passport.authenticate('google', { failureRedirect: '/login' }), (req, res)=> {
-    // Successful authentication, redirect home.
-    res.redirect('/keeper');
-  });
+// app.get("/auth/google/keeper", 
+//   passport.authenticate('google', { failureRedirect: '/login' }), (req, res)=> {
+//     // Successful authentication, redirect home.
+//     res.redirect('/keeper');
+//   });
 
   ///////////facebook login
 // app.get('/auth/facebook',
