@@ -25,8 +25,8 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session())
-
-mongoose.connect("mongodb://0.0.0.0:27017/userDB", {useNewUrlParser: true});
+let net = "mongodb+srv://etineh:etineh@eventapp.axc5h4p.mongodb.net"
+mongoose.connect(`${net}/keeperDB`, {useNewUrlParser: true});
 
 const userSchema = new mongoose.Schema({
     googleId: String,
@@ -52,9 +52,9 @@ passport.serializeUser((user, done)=> {
     done(null, user.id);
 });
 passport.deserializeUser(function(id, done) {
-UserModel.findById(id, (err, user)=>{
-    done(err, user);
-});
+    UserModel.findById(id, (err, user)=>{
+        done(err, user);
+    });
 });
 
   //google login setup
@@ -122,11 +122,8 @@ app.get("/login", (req, res)=>{
     res.render("login", {loginPage: loginDisplay1});
 });
 app.post("/login", (req, res)=>{
-    const newUser = new UserModel ({
-        username: req.body.username,
-        password: req.body.passport
-    })
-    req.login(newUser, (err)=>{
+    // const newUser = new UserModel
+    req.login(new UserModel, (err)=>{
         if(err){
             res.send("Error. Make sure email and password matches")
             console.log(err)
