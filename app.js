@@ -57,7 +57,7 @@ passport.deserializeUser(function(id, done) {
     });
 });
 
-  //google login setup
+  //google login setup //
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
