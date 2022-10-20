@@ -205,7 +205,10 @@ app.get("/logout", (req, res)=>{
     });
 })
 
-
-app.listen(4000, ()=>{
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 4000;
+}
+app.listen(port, ()=>{
     console.log("Hello! I am running on port 4000");
 });
