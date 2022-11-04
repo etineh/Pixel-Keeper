@@ -229,8 +229,8 @@ app.get("/forgetPassword", (req, res)=>{
                     res.redirect("/forgetPassword")
                 } else{
                     const randomCode = Math.floor((Math.random()+1) * process.env.CODE)
-                    forgetPass = "enter the code sent to your mail and enter new password"; 
-                    inpType="number", inpHolder="enter code", hid = "password";
+                    forgetPass = "Successfully resent code to your email. Enter the code, then proceed with new password"; 
+                    inpType="number", inpHolder="Enter code", hid = "password";
                     seen.forgetCode = randomCode;
                     seen.save(err=>{
                         if(!err){
@@ -245,23 +245,23 @@ app.get("/forgetPassword", (req, res)=>{
             res.render("forgetPassword", {forgetPass, inpType, inpHolder, hid, hidCode})
         }
     } else{
-        forgetPass = "", inpType="email", inpHolder="email address", hid="hidden", hidCode = "";
+        forgetPass = "", inpType="email", inpHolder="Email address", hid="hidden", hidCode = "";
         res.render("forgetPassword", {forgetPass, inpType, inpHolder, hid, hidCode});
     }
 })
 
 app.post("/forgetPassword", (req, res)=>{
-    access = req.body.username;
-    let newPass = req.body.newPass, confirmPass = req.body.confirmPass;
+    let newPass = req.body.newPass, access2 = req.body.username, confirmPass = req.body.confirmPass;
     if(!fCheck){
+        access = req.body.username;
         UserModel.findOne({username:access}, (err, seen)=>{
             if(seen === null){
                 forgetPass = "Email not found, enter valid email address.";
                 res.redirect("/forgetPassword");
             } else{
                 randomCode = Math.floor((Math.random()+1) * process.env.CODE)
-                forgetPass = "enter the code sent to your mail and enter new password"; 
-                inpType="number", inpHolder="enter code", hid = "password", hidCode = "Resend-Code";
+                forgetPass = "Enter the code sent to your mail, then proceed with new password"; 
+                inpType="number", inpHolder="Enter code", hid = "password", hidCode = "Resend-Code";
                 seen.forgetCode = randomCode;
                 seen.save(err=>{
                     if(!err){
@@ -274,12 +274,11 @@ app.post("/forgetPassword", (req, res)=>{
         })
         check = 1
     } else{
-        UserModel.findOne({forgetCode:access}, (err, seenCode)=>{
-            inpType="number", hid = "password", inpHolder="enter code";
+        UserModel.findOne({forgetCode:access2}, (err, seenCode)=>{
+            inpType="number", hid = "password", inpHolder="Enter code", hidCode = "Resend-Code";
             if(seenCode == null){
                 forgetPass = "Invalid code from email. Re-enter correct code.";
                 res.redirect("/forgetPassword");
-                console.log(forgetPass);
             } else{
                 if(newPass === confirmPass){
                     seenCode.setPassword(newPass, (err)=>{
@@ -303,8 +302,8 @@ app.post("/forgetPassword", (req, res)=>{
 })
 /////////////    resend forget password code        //////////////////
 app.get("/resendCode", (req, res)=>{
-    resend = 0
-    res.redirect("/forgetPassword")
+    resend = 0;
+    res.redirect("/forgetPassword");
 })
 
 ///////////////////////// change password ///////////////////////
