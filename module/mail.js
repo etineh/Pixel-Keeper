@@ -1,11 +1,6 @@
 //jshint esversion:6
 const nodemailer = require('nodemailer')
 
-// exports.randomNum= ()=>{
-//     const randomNum1 = Math.floor((Math.random()+1) * 47388)
-//     return randomNum1
-// }
-
 exports.mailCode = (randomCode, seen)=>{
     // const randomCode = Math.floor((Math.random()+1) * 47388)
     const transporter = nodemailer.createTransport({
@@ -19,8 +14,7 @@ exports.mailCode = (randomCode, seen)=>{
         from: 'etine4real@gmail.com',
         to: seen,
         subject: 'forget password code',
-        html: `<h1 style="color:red">Welcome</h1><p>That was easy!</p>
-                <p> Here is your code ${randomCode} </p>`
+        html: `<h1 style="color:red">Welcome</h1><p> Here is your code ${randomCode} </p>`
       };
       
     transporter.sendMail(mailOptions, function(error, info){

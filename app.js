@@ -11,6 +11,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 // const FacebookStrategy = require("passport-facebook").Strategy;
 const findOrCreate = require('mongoose-findorcreate');
 const mailer = require(__dirname+'/module/mail')
+const urlName = require(__dirname + "/module/urlName")
 
 const app = express();
 
@@ -88,12 +89,13 @@ passport.use(new GoogleStrategy({
 
 //////////////////// global variables ///////////////
 let passwordStatus = "", forgetPass = "", inpType="email", check = 0, inpHolder="email address"
-let hid = "hidden", fCheck = 0
+let hid = "hidden", fCheck = 0, great = 0, access = 1, resend = 1, hidCode = "Resend-Code"
 
+//////////////////       home       ///////////////
 app.get("/", (req, res)=>{
     check = 0, fCheck = 0
     if(req.isAuthenticated()){
-        res.redirect("/keeper")
+        res.redirect(`/keeper/:${great}`)
     }else{
         res.render("home");
     }  
@@ -107,7 +109,7 @@ app.get("/auth/google",
 app.get("/auth/google/keeper", 
   passport.authenticate('google', { failureRedirect: '/login' }), (req, res)=> {
     // Successful authentication, redirect home.
-    res.redirect('/keeper');
+    res.redirect(`/keeper/:${great}`);
   });
 
   ///////////facebook login
@@ -121,14 +123,15 @@ app.get("/auth/google/keeper",
 //     res.redirect('/keeper');
 //   });
 
-app.get("/keeper", (req, res)=>{
+app.get(`/keeper/:${great}`, (req, res)=>{
 
     if(req.isAuthenticated()){
         SecretModel.find({"userId":req.user.id}, (err, seen)=>{
             if(err){
                 console.log(err)
             } else {
-            res.render("keeper", {display: seen})
+                passwordStatus = ""
+                res.render("keeper", {display: seen})
             }
         })
     } else{
@@ -154,14 +157,20 @@ app.post("/submit", (req, res)=>{
         if(err){
             console.log(err)
         } else{
-            res.redirect("/keeper")
+            // great = req.user.username
+            res.redirect(`/keeper/:${great}`) 
         }
     })
 })
 
 ////////////////     registration      //////////////////
 app.get("/register", (req, res)=>{
-    res.render("register");
+    check = 0, fCheck = 0
+    if(req.isAuthenticated()){
+        res.redirect(`/keeper/:${great}`)
+    }else{
+        res.render("register");
+    }
 });
 app.post("/register", (req, res)=>{
     UserModel.register({username: req.body.username}, req.body.password, (err)=>{
@@ -170,7 +179,8 @@ app.post("/register", (req, res)=>{
             console.log(err)
         }else{
             passport.authenticate("local")(req, res, ()=>{
-                res.redirect("/keeper")
+                great = urlName(req.user.username)
+                res.redirect(`/keeper/:${great}`) 
                 // res.render("login", {loginPage: "Registration sucessful. Login here!"});
             })
         }
@@ -179,7 +189,12 @@ app.post("/register", (req, res)=>{
 
 //////////////    login    //////////////////
 app.get("/login", (req, res)=>{
-    res.render("login", {loginPage: ""});
+    check = 0, fCheck = 0
+    if(req.isAuthenticated()){
+        res.redirect(`/keeper/:${great}`)
+    }else{
+        res.render("login", {loginPage: ""});
+    }
 });
 app.post("/login", (req, res)=>{
     // const newUser = new UserModel
@@ -189,7 +204,8 @@ app.post("/login", (req, res)=>{
             console.log(err)
         } else {
             passport.authenticate("local")(req, res, ()=>{
-                res.redirect("/keeper")
+                great = urlName.name(req.user.username)
+                res.redirect(`/keeper/:${great}`)
             })
         }
     })
@@ -199,37 +215,59 @@ app.post("/login", (req, res)=>{
 app.post("/delete", (req, res)=>{
     const del = req.body.del
     SecretModel.findByIdAndDelete(del, (err)=>{
-        err? console.log(err): res.redirect("/keeper")
+        err? console.log(err): res.redirect(`/keeper/:${great}`)
     })
 })
 
 ///////////////////////// forget password ///////////////////////
 app.get("/forgetPassword", (req, res)=>{
-        if(check){
-            res.render("forgetPassword", {forgetPass, inpType, inpHolder, hid})
-        } else{
-            forgetPass = "", inpType="email", inpHolder="email address", hid="hidden"
-            res.render("forgetPassword", {forgetPass, inpType, inpHolder, hid})
+    if(check){
+        if(!resend){
+            UserModel.findOne({username:access}, (err, seen)=>{
+                if(seen === null){
+                    forgetPass = "Email not found, enter valid email address."
+                    res.redirect("/forgetPassword")
+                } else{
+                    const randomCode = Math.floor((Math.random()+1) * process.env.CODE)
+                    forgetPass = "enter the code sent to your mail and enter new password"; 
+                    inpType="number", inpHolder="enter code", hid = "password";
+                    seen.forgetCode = randomCode;
+                    seen.save(err=>{
+                        if(!err){
+                            mailer.mailCode(randomCode, seen.username);
+                            res.redirect("/forgetPassword");
+                            fCheck = 1, resend = 1;
+                        }
+                    });
+                }
+            })
+        } else {
+            res.render("forgetPassword", {forgetPass, inpType, inpHolder, hid, hidCode})
         }
+    } else{
+        forgetPass = "", inpType="email", inpHolder="email address", hid="hidden", hidCode = "";
+        res.render("forgetPassword", {forgetPass, inpType, inpHolder, hid, hidCode});
+    }
 })
 
 app.post("/forgetPassword", (req, res)=>{
-    let access = req.body.username, newPass = req.body.newPass, confirmPass = req.body.confirmPass;
+    access = req.body.username;
+    let newPass = req.body.newPass, confirmPass = req.body.confirmPass;
     if(!fCheck){
         UserModel.findOne({username:access}, (err, seen)=>{
             if(seen === null){
-                forgetPass = "Email not found, enter valid email address."
-                res.redirect("/forgetPassword")
+                forgetPass = "Email not found, enter valid email address.";
+                res.redirect("/forgetPassword");
             } else{
-                const randomCode = Math.floor((Math.random()+1) * process.env.CODE)
+                randomCode = Math.floor((Math.random()+1) * process.env.CODE)
                 forgetPass = "enter the code sent to your mail and enter new password"; 
-                inpType="number", inpHolder="enter code", hid = "password"; 
+                inpType="number", inpHolder="enter code", hid = "password", hidCode = "Resend-Code";
                 seen.forgetCode = randomCode;
                 seen.save(err=>{
                     if(!err){
                         mailer.mailCode(randomCode, seen.username);
                         res.redirect("/forgetPassword");
-                        fCheck = 1
+                        fCheck = 1;
                     }
                 });
             }
@@ -239,9 +277,9 @@ app.post("/forgetPassword", (req, res)=>{
         UserModel.findOne({forgetCode:access}, (err, seenCode)=>{
             inpType="number", hid = "password", inpHolder="enter code";
             if(seenCode == null){
-                forgetPass = "Invalid code. Re-enter correct code.";
+                forgetPass = "Invalid code from email. Re-enter correct code.";
                 res.redirect("/forgetPassword");
-                console.log("Invalid code from email");
+                console.log(forgetPass);
             } else{
                 if(newPass === confirmPass){
                     seenCode.setPassword(newPass, (err)=>{
@@ -250,7 +288,7 @@ app.post("/forgetPassword", (req, res)=>{
                                 if(!err){
                                     forgetPass = "", inpType="email", inpHolder="email address", hid="hidden";
                                     res.render("login", {loginPage: "Password reset. Login"});
-                                    check = 0;
+                                    check = 0, access = 1;
                                 }
                             })
                         }
@@ -263,40 +301,46 @@ app.post("/forgetPassword", (req, res)=>{
         })
     }    
 })
+/////////////    resend forget password code        //////////////////
+app.get("/resendCode", (req, res)=>{
+    resend = 0
+    res.redirect("/forgetPassword")
+})
 
 ///////////////////////// change password ///////////////////////
 app.get("/changePassword", (req, res)=>{
-    res.render("changePassword", {passwordStatus})
-})
-
-app.post("/changePassword", (req, res)=>{
     if(req.isAuthenticated()){
-        let old = req.body.old, newP = req.body.new, conP = req.body.conf
-        UserModel.findById(req.user.id, (err, seen)=>{
-            if(newP === conP) {
-                seen.changePassword(old, newP, (err)=>{
-                    if(err){
-                        passwordStatus = "old password incorrect"
-                        res.redirect("/changePassword")
-                    } else {
-                        passwordStatus = "password successfully change."
-                        res.redirect("/changePassword")
-                    }
-                })
-            } else {
-                passwordStatus = "password don't match."
-                res.redirect("/changePassword")
-            }
-        })
+        res.render("changePassword", {passwordStatus})
     } else {
         res.redirect("/login")
     }
+})
+
+app.post("/changePassword", (req, res)=>{  
+    let old = req.body.old, newP = req.body.new, conP = req.body.conf
+    UserModel.findById(req.user.id, (err, seen)=>{
+        if(newP === conP) {
+            seen.changePassword(old, newP, (err)=>{
+                if(err){
+                    passwordStatus = "old password incorrect"
+                    res.redirect("/changePassword")
+                } else {
+                    passwordStatus = "Password successfully change. Click 'home' to return back!"
+                    res.redirect("/changePassword")
+                }
+            })
+        } else {
+            passwordStatus = "password don't match."
+            res.redirect("/changePassword")
+        }
+    })   
 })
 
 //////////// logout ////////////////////////
 app.get("/logout", (req, res)=>{
     req.logOut((err)=>{
         if(!err){
+            great = 0
             res.redirect("/");
         }
     });
