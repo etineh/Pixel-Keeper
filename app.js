@@ -109,6 +109,7 @@ app.get("/auth/google",
 app.get("/auth/google/keeper", 
   passport.authenticate('google', { failureRedirect: '/login' }), (req, res)=> {
     // Successful authentication, redirect home.
+    great = urlName(req.user.username);
     res.redirect(`/keeper/:${great}`);
   });
 
@@ -344,6 +345,10 @@ app.get("/logout", (req, res)=>{
         }
     });
 })
+
+app.get("*",(req, res) => {
+    res.redirect("/");
+});
 
 let port = process.env.PORT;
 if (port == null || port == "") {
