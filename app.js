@@ -95,7 +95,7 @@ let hid = "hidden", fCheck = 0, great = 0, access = 1, resend = 1, hidCode = "Re
 app.get("/", (req, res)=>{
     check = 0, fCheck = 0
     if(req.isAuthenticated()){
-        res.redirect(`/keeper/:${great}`)
+        res.redirect(`/keeper/${great}`)
     }else{
         res.render("home");
     }  
@@ -109,7 +109,7 @@ app.get("/auth/google",
 app.get("/auth/google/keeper", 
   passport.authenticate('google', { failureRedirect: '/login' }), (req, res)=> {
     // Successful authentication, redirect home.
-    res.redirect(`/keeper/:${great}`);
+    res.redirect(`/keeper/${great}`);
   });
 
   ///////////facebook login
@@ -158,7 +158,7 @@ app.post("/submit", (req, res)=>{
             console.log(err)
         } else{
             // great = req.user.username
-            res.redirect(`/keeper/:${great}`) 
+            res.redirect(`/keeper/${great}`) 
         }
     })
 })
@@ -167,7 +167,7 @@ app.post("/submit", (req, res)=>{
 app.get("/register", (req, res)=>{
     check = 0, fCheck = 0
     if(req.isAuthenticated()){
-        res.redirect(`/keeper/:${great}`)
+        res.redirect(`/keeper/${great}`)
     }else{
         res.render("register");
     }
@@ -191,7 +191,7 @@ app.post("/register", (req, res)=>{
 app.get("/login", (req, res)=>{
     check = 0, fCheck = 0
     if(req.isAuthenticated()){
-        res.redirect(`/keeper/:${great}`)
+        res.redirect(`/keeper/${great}`)
     }else{
         res.render("login", {loginPage: ""});
     }
@@ -215,7 +215,7 @@ app.post("/login", (req, res)=>{
 app.post("/delete", (req, res)=>{
     const del = req.body.del
     SecretModel.findByIdAndDelete(del, (err)=>{
-        err? console.log(err): res.redirect(`/keeper/:${great}`)
+        err? console.log(err): res.redirect(`/keeper/${great}`)
     })
 })
 
