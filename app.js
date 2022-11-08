@@ -179,8 +179,8 @@ app.post("/register", (req, res)=>{
             console.log(err)
         }else{
             passport.authenticate("local")(req, res, ()=>{
-                great = urlName(req.user.username)
-                res.redirect(`/keeper/:${great}`) 
+                great = urlName.name(req.user.username)
+                res.redirect(`/keeper/${great}`) 
                 // res.render("login", {loginPage: "Registration sucessful. Login here!"});
             })
         }
@@ -205,7 +205,7 @@ app.post("/login", (req, res)=>{
         } else {
             passport.authenticate("local")(req, res, ()=>{
                 great = urlName.name(req.user.username)
-                res.redirect(`/keeper/:${great}`)
+                res.redirect(`/keeper/${great}`)
             })
         }
     })
